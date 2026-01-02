@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Story Map</title>
+
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div id="map"></div>
+
+  <div class="map-overlay">
+    <div class="map-title">Stories</div>
+    <div class="map-subtitle">
+      Click clusters to zoom. Click a point for details.
+    </div>
+  </div>
+
+  <!-- Mapbox must load BEFORE app.js -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.17.0/mapbox-gl.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>

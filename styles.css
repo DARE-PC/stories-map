@@ -1,0 +1,75 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Overlay box */
+.map-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 10px 12px;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  max-width: 280px;
+}
+
+.map-title {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.map-subtitle {
+  font-size: 12px;
+  opacity: 0.85;
+  line-height: 1.35;
+}
+
+/* Popup base */
+.mapboxgl-popup {
+  max-width: 320px;
+}
+
+.mapboxgl-popup-content {
+  border-radius: 12px;
+  padding: 12px 12px 10px 12px;
+}
+
+/* Date line (bold, first line) */
+.popup-date {
+  font-size: 12px;
+  margin: 0 0 6px 0;
+  opacity: 0.95;
+  line-height: 1.25;
+}
+
+/* Title line (regular, second line) */
+.popup-title {
+  font-weight: 400; /* regular */
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+/* Link button */
+.popup-link {
+  display: inline-block;
+  font-size: 12px;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: inherit;
+}
+
+.popup-link:hover {
+  border-color: rgba(0, 0, 0, 0.25);
+}
