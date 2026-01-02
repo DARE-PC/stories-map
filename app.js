@@ -1,7 +1,7 @@
 // =====================
 // 1) Add your Mapbox token
 // =====================
-mapboxgl.accessToken = "pk.eyJ1IjoicGNlbnRlciIsImEiOiJjbWlseW5qcTAwdjB2M2VzNTd1dXhyMzRkIn0.tevU-SFo4J5a0B4ppcZ-7g";
+mapboxgl.accessToken = "pk.eyJ1IjoicGNlbnRlciIsImEiOiJjbWp3djNpMDM1ZGFyM2dxeDQzM2t2dnEyIn0.dd2wiFOBBm9P5cYjItXY7A";
 
 // =====================
 // 2) Create map
@@ -15,7 +15,7 @@ const map = new mapboxgl.Map({
 });
 
 
-map.setProjection("mercator"); // TO make it flat (remove for 3D)
+// map.setProjection("mercator"); // Activate this to make the map flat
 
 
 map.addControl(new mapboxgl.NavigationControl({ showCompass: true }), "top-right");
