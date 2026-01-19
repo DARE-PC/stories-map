@@ -371,10 +371,33 @@ map.on("load", () => {
       </a>
     `;
 
-    new mapboxgl.Popup({ offset: 12, closeButton: true })
+    // Mobile-only: make Mapbox auto-pan keep popup in a "safe area"
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+    let popupOptions = { offset: 12, closeButton: true };
+
+    if (isMobile) {
+      const overlayEl = document.querySelector(".map-overlay");
+      const overlayH = overlayEl ? overlayEl.getBoundingClientRect().height : 0;
+
+      popupOptions = {
+        offset: 12,
+        closeButton: true,
+        autoPan: true,
+        autoPanPadding: {
+          top: Math.ceil(overlayH + 16), // ✅ keeps popup below your overlay
+          right: 16,
+          bottom: 16,
+          left: 16,
+        },
+      };
+    }
+
+    new mapboxgl.Popup(popupOptions)
       .setLngLat(coordinates)
       .setHTML(popupHtml)
       .addTo(map);
+
   });
 
   // Cursor changes

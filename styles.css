@@ -230,3 +230,16 @@ html, body {
     max-height: 180px;
   }
 }
+
+/* Ensure popups render above the overlay */
+.map-overlay {
+  z-index: 10;
+}
+
+.mapboxgl-popup {
+  z-index: 9999;
+}
+
+.mapboxgl-popup-tip {
+  z-index: 9999;
+}
