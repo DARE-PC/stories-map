@@ -121,3 +121,112 @@ html, body {
   width: 100%;
   height: auto;
 }
+
+/* Mobile: make overlay smaller + hide subtitle */
+@media (max-width: 768px) {
+  .map-overlay {
+    max-width: 220px;
+    padding: 8px 10px;
+    top: 10px;
+    left: 10px;
+  }
+
+  .map-title {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .map-subtitle {
+    display: none;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    margin-bottom: 5px;
+  }
+
+  .filter-select {
+    font-size: 12px;
+    padding: 7px 9px;
+  }
+}
+
+
+/* =========================
+   Year picker v2 (custom)
+   ========================= */
+
+.yearpicker {
+  position: relative;
+}
+
+.yearpicker-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.15);
+  background: rgba(255,255,255,0.95);
+  cursor: pointer;
+}
+
+.yearpicker-btn:active {
+  transform: translateY(0.5px);
+}
+
+.yearpicker-caret {
+  opacity: 0.7;
+  margin-left: 10px;
+}
+
+.yearpicker-panel {
+  position: absolute;
+  z-index: 9999;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+
+  background: rgba(255,255,255,0.98);
+  border: 1px solid rgba(0,0,0,0.15);
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(0,0,0,0.16);
+  padding: 8px;
+}
+
+
+.yearpicker-list {
+  max-height: 220px;   /* ✅ makes it scrollable */
+  overflow: auto;
+  border-radius: 10px;
+}
+
+.yearpicker-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.yearpicker-item:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.yearpicker-item[aria-selected="true"] {
+  background: rgba(0,0,0,0.10);
+  font-weight: 600;
+}
+
+/* Mobile: slightly reduce dropdown height */
+@media (max-width: 768px) {
+  .yearpicker-list {
+    max-height: 180px;
+  }
+}

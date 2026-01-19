@@ -13,13 +13,27 @@
   <div id="map"></div>
 
   <div class="map-overlay">
-    <div class="map-title">Stories supported by the Pulitzer Center (2006-2025)</div>
+    <div class="map-title">Our stories (2006-2025)</div>
     <div class="map-subtitle">
       Click clusters or scroll to zoom. Click on a point to access that story.
     </div>
     <div class="filter-block">
-      <label for="yearFilter" class="filter-label">Filter by year:</label>
-      <select id="yearFilter" class="filter-select">
+      <div class="filter-label">Filter by year:</div>
+
+      <!-- Custom year picker (v2) -->
+      <div class="yearpicker" id="yearPicker">
+        <button type="button" class="yearpicker-btn" id="yearPickerBtn" aria-expanded="false">
+          <span id="yearPickerLabel">All</span>
+          <span class="yearpicker-caret" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="yearpicker-panel" id="yearPickerPanel" hidden>
+          <div class="yearpicker-list" id="yearPickerList" role="listbox" aria-label="Years"></div>
+        </div>
+      </div>
+
+      <!-- Native select fallback (easy revert) -->
+      <select id="yearFilter" class="filter-select" style="display:none;">
         <option value="all">All</option>
       </select>
     </div>

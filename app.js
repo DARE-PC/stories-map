@@ -1,4 +1,9 @@
 // =====================
+// Custom Year Picker toggle
+// =====================
+const USE_CUSTOM_YEAR_PICKER = true;
+
+// =====================
 // 1) Add your Mapbox token
 // =====================
 mapboxgl.accessToken = "pk.eyJ1IjoicGNlbnRlciIsImEiOiJjbWp3djNpMDM1ZGFyM2dxeDQzM2t2dnEyIn0.dd2wiFOBBm9P5cYjItXY7A";
@@ -110,11 +115,24 @@ map.on("load", () => {
   });
 
   // ---------------------
-  // YEAR FILTER (works with clustering)
+  // YEAR FILTER (Custom picker v2, no search, works with clustering)
   // ---------------------
   const yearSelect = document.getElementById("yearFilter");
 
+  // Custom picker elements
+  const yearPicker = document.getElementById("yearPicker");
+  const yearPickerBtn = document.getElementById("yearPickerBtn");
+  const yearPickerLabel = document.getElementById("yearPickerLabel");
+  const yearPickerPanel = document.getElementById("yearPickerPanel");
+  const yearPickerList = document.getElementById("yearPickerList");
+
   let allGeojson = null;
+  let availableYears = []; // includes "all" + years (desc)
+  let currentYear = "all";
+
+  function labelForYear(y) {
+    return y === "all" ? "All" : y;
+  }
 
   function setSourceToYear(selectedYear) {
     if (!allGeojson) return;
@@ -122,6 +140,8 @@ map.on("load", () => {
     const y = String(selectedYear || "all");
     const src = map.getSource("stories");
     if (!src) return;
+
+    currentYear = y;
 
     if (y === "all") {
       src.setData(allGeojson);
@@ -137,54 +157,149 @@ map.on("load", () => {
     });
   }
 
-  // Load full GeoJSON once to populate dropdown + allow year filtering via setData()
-  if (yearSelect) {
-    fetch(geojsonUrl)
-      .then((r) => r.json())
-      .then((data) => {
-        allGeojson = data;
+  function buildYearsFromData(data) {
+    const yearsSet = new Set();
 
-        // Populate dropdown options
-        const years = new Set();
-        for (const f of data.features || []) {
-          const y = f?.properties?.year;
-          if (y && String(y).trim()) years.add(String(y).trim());
-        }
+    for (const f of data.features || []) {
+      const y = f?.properties?.year;
+      if (y && String(y).trim()) yearsSet.add(String(y).trim());
+    }
 
-        const sortedYears = Array.from(years).sort((a, b) => {
-          const na = Number(a);
-          const nb = Number(b);
+    const sortedYearsDesc = Array.from(yearsSet).sort((a, b) => {
+      const na = Number(a);
+      const nb = Number(b);
 
-          // If both look like numbers (years), sort DESC
-          if (!Number.isNaN(na) && !Number.isNaN(nb)) {
-            return nb - na; // ⬅ latest first
-          }
+      // numeric sort desc if possible
+      if (!Number.isNaN(na) && !Number.isNaN(nb)) return nb - na;
 
-          // Fallback: string DESC
-          return b.localeCompare(a);
-        });
+      // fallback string desc
+      return b.localeCompare(a);
+    });
 
-        // Keep the first option ("All"), rebuild the rest
-        while (yearSelect.options.length > 1) yearSelect.remove(1);
-
-        for (const y of sortedYears) {
-          const opt = document.createElement("option");
-          opt.value = y;
-          opt.textContent = y;
-          yearSelect.appendChild(opt);
-        }
-
-        // Apply initial filter (default is "All")
-        setSourceToYear(yearSelect.value);
-
-        yearSelect.addEventListener("change", (e) => {
-          setSourceToYear(e.target.value);
-        });
-      })
-      .catch(() => {
-        // Dropdown will exist but filtering/population won't
-      });
+    availableYears = ["all", ...sortedYearsDesc];
   }
+
+  // Native select fallback (hidden, but kept in sync)
+  function populateNativeSelect() {
+    if (!yearSelect) return;
+
+    while (yearSelect.options.length > 1) yearSelect.remove(1);
+
+    for (const y of availableYears) {
+      if (y === "all") continue;
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+
+    yearSelect.value = currentYear;
+
+    // bind only once
+    if (!yearSelect.dataset.bound) {
+      yearSelect.addEventListener("change", (e) => setSourceToYear(e.target.value));
+      yearSelect.dataset.bound = "true";
+    }
+  }
+
+  function renderPickerList() {
+    if (!yearPickerList) return;
+
+    yearPickerList.innerHTML = "";
+
+    for (const y of availableYears) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "yearpicker-item";
+      btn.setAttribute("role", "option");
+      btn.dataset.value = y;
+      btn.textContent = labelForYear(y);
+      btn.setAttribute("aria-selected", y === currentYear ? "true" : "false");
+
+      btn.addEventListener("click", () => {
+        setSourceToYear(y);
+
+        if (yearPickerLabel) yearPickerLabel.textContent = labelForYear(y);
+        if (yearSelect) yearSelect.value = y;
+
+        closePicker();
+      });
+
+      yearPickerList.appendChild(btn);
+    }
+  }
+
+  function openPicker() {
+    if (!yearPickerPanel) return;
+    yearPickerPanel.hidden = false;
+    if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "true");
+    renderPickerList();
+  }
+
+  function closePicker() {
+    if (!yearPickerPanel) return;
+    yearPickerPanel.hidden = true;
+    if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function initCustomPicker() {
+    if (!yearPicker || !yearPickerBtn || !yearPickerPanel || !yearPickerLabel) return;
+
+    yearPickerLabel.textContent = labelForYear(currentYear);
+
+    // button toggle (bind once)
+    if (!yearPickerBtn.dataset.bound) {
+      yearPickerBtn.addEventListener("click", () => {
+        const isOpen = yearPickerBtn.getAttribute("aria-expanded") === "true";
+        if (isOpen) closePicker();
+        else openPicker();
+      });
+      yearPickerBtn.dataset.bound = "true";
+    }
+
+    // close when clicking outside (bind once)
+    if (!document.body.dataset.yearpickerBound) {
+      document.addEventListener("click", (e) => {
+        if (!yearPickerPanel || yearPickerPanel.hidden) return;
+        if (yearPicker && !yearPicker.contains(e.target)) closePicker();
+      });
+
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closePicker();
+      });
+
+      document.body.dataset.yearpickerBound = "true";
+    }
+
+    renderPickerList();
+  }
+
+  // Load full GeoJSON once to populate UI + allow filtering via setData()
+  fetch(geojsonUrl)
+    .then((r) => r.json())
+    .then((data) => {
+      allGeojson = data;
+
+      buildYearsFromData(data);
+
+      // default selection
+      setSourceToYear("all");
+
+      // keep native select in sync (hidden)
+      populateNativeSelect();
+
+      if (USE_CUSTOM_YEAR_PICKER) {
+        if (yearPicker) yearPicker.style.display = "";
+        if (yearSelect) yearSelect.style.display = "none";
+        initCustomPicker();
+      } else {
+        if (yearPicker) yearPicker.style.display = "none";
+        if (yearSelect) yearSelect.style.display = "";
+      }
+    })
+    .catch(() => {
+      // If fetch fails, dropdown won't populate but the map still works.
+    });
 
   // ---------------------
   // Interactions
