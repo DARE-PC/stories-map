@@ -346,20 +346,21 @@ map.on("load", () => {
     }
 
     const authorLine = author
-      ? `<div class="popup-meta"><span class="popup-label">By</span> ${escapeHtml(author)}</div>`
+      ? `<div class="popup-meta"><span class="popup-label">By:</span> ${escapeHtml(author)}</div>`
       : "";
 
     const outletLine = outlet
-      ? `<div class="popup-meta"><span class="popup-label">Outlet</span> ${escapeHtml(outlet)}</div>`
+      ? `<div class="popup-meta"><span class="popup-label">Outlet:</span> ${escapeHtml(outlet)}</div>`
       : "";
 
-    const thumbBlock = isProbablyUrl(thumbnail)
+    const thumbBlock = isProbablyUrl(thumbnail) && isProbablyUrl(url)
       ? `
-        <a class="popup-thumb" href="${escapeAttr(thumbnail)}" target="_blank" rel="noopener noreferrer">
+        <a class="popup-thumb" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">
           <img src="${escapeAttr(thumbnail)}" alt="" loading="lazy" />
         </a>
       `
       : "";
+
 
     const popupHtml = `
       <div class="popup-date"><b>${escapeHtml(date)}</b></div>
