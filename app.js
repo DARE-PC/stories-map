@@ -232,15 +232,75 @@ if (!mapFailed && map) {
       }
     }
 
+        // --- Picker open/close behavior (MISSING in your current JS) ---
+    function openPicker() {
+      if (!yearPickerPanel) return;
+      yearPickerPanel.hidden = false;
+      if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "true");
+      renderPickerList(); // ensure list is up to date
+    }
+
+    function closePicker() {
+      if (!yearPickerPanel) return;
+      yearPickerPanel.hidden = true;
+      if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "false");
+    }
+
+    // Toggle on button click (bind once)
+    if (yearPickerBtn && !yearPickerBtn.dataset.bound) {
+      yearPickerBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!yearPickerPanel) return;
+
+        const isOpen = !yearPickerPanel.hidden;
+        if (isOpen) closePicker();
+        else openPicker();
+      });
+      yearPickerBtn.dataset.bound = "true";
+    }
+
+    // Prevent clicks inside the panel from closing it
+    if (yearPickerPanel && !yearPickerPanel.dataset.bound) {
+      yearPickerPanel.addEventListener("click", (e) => e.stopPropagation());
+      yearPickerPanel.dataset.bound = "true";
+    }
+
+    // Close when clicking outside
+    if (!document.body.dataset.yearpickerDocBound) {
+      document.addEventListener("click", () => closePicker());
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closePicker();
+      });
+      document.body.dataset.yearpickerDocBound = "true";
+    }
+
+
     fetch(geojsonUrl)
       .then((r) => r.json())
       .then((data) => {
         allGeojson = data;
+
         buildYearsFromData(data);
+
+        // default selection
         setSourceToYear("all");
+
+        // keep native select in sync (hidden)
         populateNativeSelect();
-        if (USE_CUSTOM_YEAR_PICKER) renderPickerList();
+
+        // ✅ Ensure picker UI starts consistent
+        if (yearPickerLabel) yearPickerLabel.textContent = "All";
+        if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "false");
+        if (yearPickerPanel) yearPickerPanel.hidden = true;
+
+        if (USE_CUSTOM_YEAR_PICKER) {
+          renderPickerList();
+        }
+      })
+      .catch(() => {
+        // If fetch fails, dropdown won't populate but the map still works.
       });
+
 
     // ---------------------
     // Interactions
