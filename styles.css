@@ -330,6 +330,30 @@ html, body {
   opacity: 1;
 }
 
+.popup-focus-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin: 0 0 10px 0;
+}
+
+.popup-focus-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.2;
+  opacity: 0.92;
+}
+
+.popup-focus-tag-marker {
+  display: inline-block;
+  width: 4px;
+  height: 12px;
+  border-radius: 0;
+  flex: 0 0 auto;
+}
+
 /* =========================
    WebGL fallback message
    ========================= */

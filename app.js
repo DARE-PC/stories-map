@@ -463,6 +463,7 @@ if (!mapFailed && map) {
       const title = decodeEntities(props.title ?? "Story");
       const author = decodeEntities(props.author ?? "");
       const outlet = decodeEntities(props.outlet ?? "");
+      const focus = decodeEntities(props.focus ?? "");
       const url = props.url ?? "#";
       const thumbnail = props.thumbnail ?? "";
 
@@ -499,6 +500,7 @@ if (!mapFailed && map) {
               </a>`
             : ""
         }
+        ${focusTagsHtml(focus)}
         <a class="popup-link" href="${escapeAttr(
           url
         )}" target="_blank" rel="noopener noreferrer">
@@ -545,4 +547,32 @@ function escapeHtml(str) {
 
 function escapeAttr(str) {
   return escapeHtml(str).replaceAll("`", "&#096;");
+}
+
+function focusTagsHtml(rawFocus) {
+  const focusItems = String(rawFocus || "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+
+  if (!focusItems.length) return "";
+
+  const tags = focusItems
+    .map((focus) => {
+      const color = FOCUS_COLORS[focus];
+      if (!color) return "";
+      return `<span class="popup-focus-tag">
+        <span class="popup-focus-tag-marker" style="background-color: ${escapeAttr(
+          color
+        )};" aria-hidden="true"></span>
+        <span>${escapeHtml(focus)}</span>
+      </span>`;
+    })
+    .filter(Boolean)
+    .join("");
+
+  if (!tags) return "";
+
+  return `<div class="popup-focus-tags">${tags}</div>`;
 }
