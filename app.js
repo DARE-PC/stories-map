@@ -2,6 +2,21 @@
 // Custom Year Picker toggle
 // =====================
 const USE_CUSTOM_YEAR_PICKER = true;
+const FOCUS_OPTIONS = [
+  "all",
+  "Human Rights",
+  "Peace and Conflict",
+  "Climate and Environment",
+  "Global Health",
+  "Information and Artificial Intelligence",
+];
+const FOCUS_COLORS = {
+  "Human Rights": "#76CABD",
+  "Peace and Conflict": "#B95B90",
+  "Climate and Environment": "#EFB604",
+  "Global Health": "#112C4E",
+  "Information and Artificial Intelligence": "#F47E52",
+};
 
 // =====================
 // 1) Add your Mapbox token
@@ -44,7 +59,7 @@ try {
 // =====================
 if (!mapFailed && map) {
   map.on("load", () => {
-    const geojsonUrl = "./data/stories.geojson";
+    const geojsonUrl = "./data/stories2.geojson";
 
     // ---- Source ----
     map.addSource("stories", {
@@ -126,10 +141,15 @@ if (!mapFailed && map) {
     });
 
     // ---------------------
-    // YEAR FILTER (custom picker)
+    // Filters
     // ---------------------
+    const focusSelect = document.getElementById("focusFilter");
+    const focusPickerBtn = document.getElementById("focusPickerBtn");
+    const focusPickerLabel = document.getElementById("focusPickerLabel");
+    const focusPickerPanel = document.getElementById("focusPickerPanel");
+    const focusPickerList = document.getElementById("focusPickerList");
+
     const yearSelect = document.getElementById("yearFilter");
-    const yearPicker = document.getElementById("yearPicker");
     const yearPickerBtn = document.getElementById("yearPickerBtn");
     const yearPickerLabel = document.getElementById("yearPickerLabel");
     const yearPickerPanel = document.getElementById("yearPickerPanel");
@@ -137,33 +157,78 @@ if (!mapFailed && map) {
 
     let allGeojson = null;
     let availableYears = [];
+    let currentFocus = "all";
     let currentYear = "all";
 
-    function labelForYear(y) {
-      return y === "all" ? "All" : y;
+    function labelForValue(value) {
+      return value === "all" ? "All" : value;
     }
 
-    function setSourceToYear(selectedYear) {
+    function renderFocusLabel(target, focus) {
+      if (!target) return;
+
+      target.textContent = "";
+
+      const label = document.createElement("span");
+      label.className = "focus-option-label";
+
+      if (focus !== "all") {
+        const marker = document.createElement("span");
+        marker.className = "focus-marker";
+        marker.style.backgroundColor = FOCUS_COLORS[focus] || "transparent";
+        marker.setAttribute("aria-hidden", "true");
+        label.appendChild(marker);
+      }
+
+      label.append(document.createTextNode(labelForValue(focus)));
+      target.appendChild(label);
+    }
+
+    function featureMatchesFocus(feature, selectedFocus) {
+      if (selectedFocus === "all") return true;
+
+      const focus = (feature?.properties?.focus ?? "").toString().trim();
+      if (!focus) return false;
+
+      return focus
+        .split(",")
+        .map((part) => part.trim())
+        .filter(Boolean)
+        .includes(selectedFocus);
+    }
+
+    function featureMatchesYear(feature, selectedYear) {
+      if (selectedYear === "all") return true;
+
+      const year = (feature?.properties?.year ?? "").toString().trim();
+      return year === selectedYear;
+    }
+
+    function applyFilters() {
       if (!allGeojson) return;
 
-      const y = String(selectedYear || "all");
       const src = map.getSource("stories");
       if (!src) return;
-
-      currentYear = y;
-
-      if (y === "all") {
-        src.setData(allGeojson);
-        return;
-      }
 
       src.setData({
         type: "FeatureCollection",
         features: allGeojson.features.filter((f) => {
-          const fy = (f?.properties?.year ?? "").toString().trim();
-          return fy === y;
+          return (
+            featureMatchesFocus(f, currentFocus) &&
+            featureMatchesYear(f, currentYear)
+          );
         }),
       });
+    }
+
+    function setSourceToFocus(selectedFocus) {
+      currentFocus = String(selectedFocus || "all");
+      applyFilters();
+    }
+
+    function setSourceToYear(selectedYear) {
+      currentYear = String(selectedYear || "all");
+      applyFilters();
     }
 
     function buildYearsFromData(data) {
@@ -182,6 +247,29 @@ if (!mapFailed && map) {
       });
 
       availableYears = ["all", ...sortedYearsDesc];
+    }
+
+    function populateFocusSelect() {
+      if (!focusSelect) return;
+
+      while (focusSelect.options.length > 1) focusSelect.remove(1);
+
+      for (const focus of FOCUS_OPTIONS) {
+        if (focus === "all") continue;
+        const opt = document.createElement("option");
+        opt.value = focus;
+        opt.textContent = focus;
+        focusSelect.appendChild(opt);
+      }
+
+      focusSelect.value = currentFocus;
+
+      if (!focusSelect.dataset.bound) {
+        focusSelect.addEventListener("change", (e) =>
+          setSourceToFocus(e.target.value)
+        );
+        focusSelect.dataset.bound = "true";
+      }
     }
 
     function populateNativeSelect() {
@@ -207,7 +295,32 @@ if (!mapFailed && map) {
       }
     }
 
-    function renderPickerList() {
+    function renderFocusPickerList() {
+      if (!focusPickerList) return;
+      focusPickerList.innerHTML = "";
+
+      for (const focus of FOCUS_OPTIONS) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "yearpicker-item";
+        btn.setAttribute(
+          "aria-selected",
+          focus === currentFocus ? "true" : "false"
+        );
+        renderFocusLabel(btn, focus);
+
+        btn.addEventListener("click", () => {
+          setSourceToFocus(focus);
+          renderFocusLabel(focusPickerLabel, focus);
+          if (focusSelect) focusSelect.value = focus;
+          closePicker(focusPickerPanel, focusPickerBtn);
+        });
+
+        focusPickerList.appendChild(btn);
+      }
+    }
+
+    function renderYearPickerList() {
       if (!yearPickerList) return;
       yearPickerList.innerHTML = "";
 
@@ -215,7 +328,7 @@ if (!mapFailed && map) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "yearpicker-item";
-        btn.textContent = labelForYear(y);
+        btn.textContent = labelForValue(y);
         btn.setAttribute(
           "aria-selected",
           y === currentYear ? "true" : "false"
@@ -223,55 +336,68 @@ if (!mapFailed && map) {
 
         btn.addEventListener("click", () => {
           setSourceToYear(y);
-          if (yearPickerLabel) yearPickerLabel.textContent = labelForYear(y);
+          if (yearPickerLabel) yearPickerLabel.textContent = labelForValue(y);
           if (yearSelect) yearSelect.value = y;
-          yearPickerPanel.hidden = true;
+          closePicker(yearPickerPanel, yearPickerBtn);
         });
 
         yearPickerList.appendChild(btn);
       }
     }
 
-        // --- Picker open/close behavior (MISSING in your current JS) ---
-    function openPicker() {
-      if (!yearPickerPanel) return;
-      yearPickerPanel.hidden = false;
-      if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "true");
-      renderPickerList(); // ensure list is up to date
+    function openPicker(panel, button, renderList) {
+      if (!panel) return;
+      panel.hidden = false;
+      if (button) button.setAttribute("aria-expanded", "true");
+      if (typeof renderList === "function") renderList();
     }
 
-    function closePicker() {
-      if (!yearPickerPanel) return;
-      yearPickerPanel.hidden = true;
-      if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "false");
+    function closePicker(panel, button) {
+      if (!panel) return;
+      panel.hidden = true;
+      if (button) button.setAttribute("aria-expanded", "false");
     }
 
-    // Toggle on button click (bind once)
-    if (yearPickerBtn && !yearPickerBtn.dataset.bound) {
-      yearPickerBtn.addEventListener("click", (e) => {
+    function closeAllPickers() {
+      closePicker(focusPickerPanel, focusPickerBtn);
+      closePicker(yearPickerPanel, yearPickerBtn);
+    }
+
+    function bindPickerToggle(button, panel, renderList) {
+      if (!button || button.dataset.bound) return;
+
+      button.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (!yearPickerPanel) return;
+        if (!panel) return;
 
-        const isOpen = !yearPickerPanel.hidden;
-        if (isOpen) closePicker();
-        else openPicker();
+        const isOpen = !panel.hidden;
+        if (isOpen) closePicker(panel, button);
+        else {
+          closeAllPickers();
+          openPicker(panel, button, renderList);
+        }
       });
-      yearPickerBtn.dataset.bound = "true";
+      button.dataset.bound = "true";
     }
 
-    // Prevent clicks inside the panel from closing it
-    if (yearPickerPanel && !yearPickerPanel.dataset.bound) {
-      yearPickerPanel.addEventListener("click", (e) => e.stopPropagation());
-      yearPickerPanel.dataset.bound = "true";
+    function bindPanelStopPropagation(panel) {
+      if (!panel || panel.dataset.bound) return;
+      panel.addEventListener("click", (e) => e.stopPropagation());
+      panel.dataset.bound = "true";
     }
 
-    // Close when clicking outside
-    if (!document.body.dataset.yearpickerDocBound) {
-      document.addEventListener("click", () => closePicker());
+    bindPickerToggle(focusPickerBtn, focusPickerPanel, renderFocusPickerList);
+    bindPickerToggle(yearPickerBtn, yearPickerPanel, renderYearPickerList);
+
+    bindPanelStopPropagation(focusPickerPanel);
+    bindPanelStopPropagation(yearPickerPanel);
+
+    if (!document.body.dataset.pickerDocBound) {
+      document.addEventListener("click", () => closeAllPickers());
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closePicker();
+        if (e.key === "Escape") closeAllPickers();
       });
-      document.body.dataset.yearpickerDocBound = "true";
+      document.body.dataset.pickerDocBound = "true";
     }
 
 
@@ -283,18 +409,23 @@ if (!mapFailed && map) {
         buildYearsFromData(data);
 
         // default selection
+        setSourceToFocus("all");
         setSourceToYear("all");
 
-        // keep native select in sync (hidden)
+        populateFocusSelect();
         populateNativeSelect();
 
-        // ✅ Ensure picker UI starts consistent
+        renderFocusLabel(focusPickerLabel, "all");
+        if (focusPickerBtn) focusPickerBtn.setAttribute("aria-expanded", "false");
+        if (focusPickerPanel) focusPickerPanel.hidden = true;
+
         if (yearPickerLabel) yearPickerLabel.textContent = "All";
         if (yearPickerBtn) yearPickerBtn.setAttribute("aria-expanded", "false");
         if (yearPickerPanel) yearPickerPanel.hidden = true;
 
         if (USE_CUSTOM_YEAR_PICKER) {
-          renderPickerList();
+          renderFocusPickerList();
+          renderYearPickerList();
         }
       })
       .catch(() => {

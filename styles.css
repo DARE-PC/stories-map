@@ -211,6 +211,22 @@ html, body {
   font-size: 12px;
 }
 
+.focus-marker {
+  display: inline-block;
+  width: 4px;
+  height: 16px;
+  border-radius: 0;
+  flex: 0 0 auto;
+  box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+}
+
+.focus-option-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .yearpicker-item:hover {
   background: rgba(0,0,0,0.06);
 }

@@ -1,0 +1,45 @@
+name: Update Stories Data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 05:00 UTC = 00:00 EST (UTC-5)
+    - cron: "0 5 * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-stories-data:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Download latest CSV
+        run: |
+          curl -L "https://pulitzercenter.org/sites/default/files/solrgeo/pc_admin_reports_csv_stories_coords/stories-map-csv-coords.csv" \
+            -o "data/stories2.csv"
+
+      - name: Build GeoJSON
+        run: python data/build_stories2_geojson.py
+
+      - name: Commit and push if data changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/stories2.csv data/stories2.geojson
+
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Update stories data"
+          git push
