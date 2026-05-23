@@ -477,14 +477,14 @@ if (!mapFailed && map) {
         <div class="popup-title">${escapeHtml(title)}</div>
         ${
           author
-            ? `<div class="popup-meta"><span class="popup-label">By:</span> ${escapeHtml(
+            ? `<div class="popup-meta"><span class="popup-label">By:</span>${escapeHtml(
                 author
               )}</div>`
             : ""
         }
         ${
           outlet
-            ? `<div class="popup-meta"><span class="popup-label">Outlet:</span> ${escapeHtml(
+            ? `<div class="popup-meta"><span class="popup-label">Outlet:</span>${escapeHtml(
                 outlet
               )}</div>`
             : ""
