@@ -158,6 +158,8 @@ html, body {
 }
 
 .yearpicker-btn {
+  appearance: none;
+  -webkit-appearance: none;
   width: 100%;
   display: flex;
   align-items: center;
@@ -168,6 +170,8 @@ html, body {
   border-radius: 10px;
   border: 1px solid rgba(0,0,0,0.15);
   background: rgba(255,255,255,0.95);
+  color: #111111;
+  -webkit-text-fill-color: #111111;
   cursor: pointer;
 }
 
@@ -194,13 +198,51 @@ html, body {
   padding: 8px;
 }
 
+.yearpicker-panel::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  right: 6px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.10) 0%,
+    rgba(0,0,0,0.16) 18%,
+    rgba(0,0,0,0.16) 82%,
+    rgba(0,0,0,0.10) 100%
+  );
+  pointer-events: none;
+  opacity: 0;
+}
+
 .yearpicker-list {
   max-height: 220px;
   overflow: auto;
   border-radius: 10px;
+  padding-right: 10px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.28) transparent;
+}
+
+.yearpicker-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.yearpicker-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.yearpicker-list::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.28);
+  border-radius: 0;
 }
 
 .yearpicker-item {
+  appearance: none;
+  -webkit-appearance: none;
   width: 100%;
   text-align: left;
   border: 0;
@@ -209,6 +251,8 @@ html, body {
   border-radius: 10px;
   cursor: pointer;
   font-size: 12px;
+  color: #111111;
+  -webkit-text-fill-color: #111111;
 }
 
 .focus-marker {
@@ -237,6 +281,10 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  .yearpicker-panel::after {
+    opacity: 1;
+  }
+
   .yearpicker-list {
     max-height: 180px;
   }
