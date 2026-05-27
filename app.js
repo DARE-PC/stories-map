@@ -154,11 +154,14 @@ if (!mapFailed && map) {
     const yearPickerLabel = document.getElementById("yearPickerLabel");
     const yearPickerPanel = document.getElementById("yearPickerPanel");
     const yearPickerList = document.getElementById("yearPickerList");
+    const storyCountSummary = document.getElementById("storyCountSummary");
 
     let allGeojson = null;
     let availableYears = [];
     let currentFocus = "all";
     let currentYear = "all";
+    const storyCountFormatter = new Intl.NumberFormat("en-US");
+    const mobileViewport = window.matchMedia("(max-width: 768px)");
 
     function labelForValue(value) {
       return value === "all" ? "All" : value;
@@ -204,6 +207,56 @@ if (!mapFailed && map) {
       return year === selectedYear;
     }
 
+    function getFilteredFeatures(selectedFocus = currentFocus, selectedYear = currentYear) {
+      if (!allGeojson?.features) return [];
+
+      return allGeojson.features.filter((feature) => {
+        return (
+          featureMatchesFocus(feature, selectedFocus) &&
+          featureMatchesYear(feature, selectedYear)
+        );
+      });
+    }
+
+    function formatStoryCountLabel(count) {
+      const storiesLabel = count === 1 ? "story" : "stories";
+      return `${storyCountFormatter.format(count)} ${storiesLabel}`;
+    }
+
+    function updateStoryCountSummary() {
+      if (!storyCountSummary) return;
+
+      const matchingStories = getFilteredFeatures().length;
+      storyCountSummary.textContent = `Showing ${formatStoryCountLabel(matchingStories)}`;
+    }
+
+    function getYearCount(selectedYear) {
+      return getFilteredFeatures(currentFocus, selectedYear).length;
+    }
+
+    function formatYearCount(selectedYear) {
+      const count = storyCountFormatter.format(getYearCount(selectedYear));
+      return `${labelForValue(selectedYear)} (${count})`;
+    }
+
+    function setPickerItemText(button, labelText, countText = "") {
+      if (!button) return;
+
+      button.textContent = "";
+
+      const label = document.createElement("span");
+      label.className = "yearpicker-item-label";
+      label.textContent = labelText;
+      button.appendChild(label);
+
+      if (!countText) return;
+
+      const count = document.createElement("span");
+      count.className = "yearpicker-item-count";
+      count.textContent = countText;
+      button.appendChild(count);
+    }
+
     function applyFilters() {
       if (!allGeojson) return;
 
@@ -212,18 +265,17 @@ if (!mapFailed && map) {
 
       src.setData({
         type: "FeatureCollection",
-        features: allGeojson.features.filter((f) => {
-          return (
-            featureMatchesFocus(f, currentFocus) &&
-            featureMatchesYear(f, currentYear)
-          );
-        }),
+        features: getFilteredFeatures(),
       });
+
+      updateStoryCountSummary();
     }
 
     function setSourceToFocus(selectedFocus) {
       currentFocus = String(selectedFocus || "all");
       applyFilters();
+      populateNativeSelect();
+      renderYearPickerList();
     }
 
     function setSourceToYear(selectedYear) {
@@ -276,12 +328,15 @@ if (!mapFailed && map) {
       if (!yearSelect) return;
 
       while (yearSelect.options.length > 1) yearSelect.remove(1);
+      if (yearSelect.options[0]) {
+        yearSelect.options[0].textContent = `${labelForValue("all")} (${storyCountFormatter.format(getYearCount("all"))})`;
+      }
 
       for (const y of availableYears) {
         if (y === "all") continue;
         const opt = document.createElement("option");
         opt.value = y;
-        opt.textContent = y;
+        opt.textContent = `${labelForValue(y)} (${storyCountFormatter.format(getYearCount(y))})`;
         yearSelect.appendChild(opt);
       }
 
@@ -328,11 +383,19 @@ if (!mapFailed && map) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "yearpicker-item";
-        btn.textContent = labelForValue(y);
         btn.setAttribute(
           "aria-selected",
           y === currentYear ? "true" : "false"
         );
+        if (mobileViewport.matches) {
+          setPickerItemText(btn, formatYearCount(y));
+        } else {
+          setPickerItemText(
+            btn,
+            labelForValue(y),
+            formatStoryCountLabel(getYearCount(y))
+          );
+        }
 
         btn.addEventListener("click", () => {
           setSourceToYear(y);
@@ -392,6 +455,13 @@ if (!mapFailed && map) {
     bindPanelStopPropagation(focusPickerPanel);
     bindPanelStopPropagation(yearPickerPanel);
 
+    if (!mobileViewport.datasetBound) {
+      mobileViewport.addEventListener("change", () => {
+        renderYearPickerList();
+      });
+      mobileViewport.datasetBound = "true";
+    }
+
     if (!document.body.dataset.pickerDocBound) {
       document.addEventListener("click", () => closeAllPickers());
       document.addEventListener("keydown", (e) => {
@@ -427,6 +497,8 @@ if (!mapFailed && map) {
           renderFocusPickerList();
           renderYearPickerList();
         }
+
+        updateStoryCountSummary();
       })
       .catch(() => {
         // If fetch fails, dropdown won't populate but the map still works.

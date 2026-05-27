@@ -33,6 +33,13 @@ html, body {
   line-height: 1.35;
 }
 
+.map-story-count {
+  margin-top: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #112c4e;
+}
+
 .filter-block {
   margin-top: 10px;
 }
@@ -243,6 +250,10 @@ html, body {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   text-align: left;
   border: 0;
   background: transparent;
@@ -268,6 +279,16 @@ html, body {
   align-items: center;
   gap: 8px;
   min-width: 0;
+}
+
+.yearpicker-item-label {
+  min-width: 0;
+}
+
+.yearpicker-item-count {
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.68;
 }
 
 .yearpicker-item:hover {
