@@ -1,6 +1,7 @@
 html, body {
   height: 100%;
   margin: 0;
+  overflow-x: hidden;
   font-family: "Lato", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -14,23 +15,28 @@ html, body {
   position: absolute;
   top: 12px;
   left: 12px;
-  width: min(320px, calc(100vw - 24px));
+  width: 320px;
+  max-width: calc(100vw - 24px);
   display: flex;
   flex-direction: column;
   gap: 16px;
+  box-sizing: border-box;
 }
 
 .overlay-brand {
   width: 100%;
+  max-width: 100%;
 }
 
 .overlay-brand-link {
   display: block;
+  width: 100%;
 }
 
 .overlay-brand-logo {
   display: block;
   width: 100%;
+  max-width: 100%;
   height: auto;
 }
 
@@ -152,8 +158,13 @@ html, body {
   .map-overlay {
     top: 10px;
     left: 10px;
-    width: min(300px, calc(100vw - 20px));
-    gap: 12px;
+    width: min(280px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+    gap: 10px;
+  }
+
+  .overlay-brand {
+    width: min(220px, calc(100vw - 20px));
   }
 
   .overlay-panel {
