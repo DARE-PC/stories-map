@@ -24,52 +24,70 @@
         or try a different browser (Chrome, Firefox, Safari).
       </p>
     </div>
-  </div>  
+    </div>  
   
   <div class="map-overlay">
-    <div class="map-title">Our stories (2006-2026)</div>
-    <div class="map-subtitle">
-      Click clusters or scroll to zoom. Click on a point to access that story.
+    <div class="overlay-brand">
+      <a
+        class="overlay-brand-link"
+        href="https://pulitzercenter.org/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Visit the Pulitzer Center homepage"
+      >
+        <img
+          class="overlay-brand-logo"
+          src="./img/pc20logo.png"
+          alt="Pulitzer Center twenty years of impact"
+        />
+      </a>
     </div>
-    <div class="filter-block">
-      <div class="filter-label">Filter by focus area:</div>
 
-      <div class="yearpicker" id="focusPicker">
-        <button type="button" class="yearpicker-btn" id="focusPickerBtn" aria-expanded="false">
-          <span id="focusPickerLabel">All</span>
-          <span class="yearpicker-caret" aria-hidden="true">▾</span>
-        </button>
+    <div class="overlay-panel">
+      <div class="map-title">Our stories (2006-2026)</div>
+      <div class="map-subtitle">
+        Click clusters or scroll to zoom. Click on a point to access that story.
+      </div>
+      <div class="filter-block">
+        <div class="filter-label">Filter by focus area:</div>
 
-        <div class="yearpicker-panel" id="focusPickerPanel" hidden>
-          <div class="yearpicker-list" id="focusPickerList" role="listbox" aria-label="Focus areas"></div>
+        <div class="yearpicker" id="focusPicker">
+          <button type="button" class="yearpicker-btn" id="focusPickerBtn" aria-expanded="false">
+            <span id="focusPickerLabel">All</span>
+            <span class="yearpicker-caret" aria-hidden="true">▾</span>
+          </button>
+
+          <div class="yearpicker-panel" id="focusPickerPanel" hidden>
+            <div class="yearpicker-list" id="focusPickerList" role="listbox" aria-label="Focus areas"></div>
+          </div>
         </div>
+
+        <select id="focusFilter" class="filter-select" style="display:none;">
+          <option value="all">All</option>
+        </select>
       </div>
 
-      <select id="focusFilter" class="filter-select" style="display:none;">
-        <option value="all">All</option>
-      </select>
-    </div>
+      <div class="filter-block">
+        <div class="filter-label">Filter by year:</div>
 
-    <div class="filter-block">
-      <div class="filter-label">Filter by year:</div>
+        <div class="yearpicker" id="yearPicker">
+          <button type="button" class="yearpicker-btn" id="yearPickerBtn" aria-expanded="false">
+            <span id="yearPickerLabel">All</span>
+            <span class="yearpicker-caret" aria-hidden="true">▾</span>
+          </button>
 
-      <div class="yearpicker" id="yearPicker">
-        <button type="button" class="yearpicker-btn" id="yearPickerBtn" aria-expanded="false">
-          <span id="yearPickerLabel">All</span>
-          <span class="yearpicker-caret" aria-hidden="true">▾</span>
-        </button>
-
-        <div class="yearpicker-panel" id="yearPickerPanel" hidden>
-          <div class="yearpicker-list" id="yearPickerList" role="listbox" aria-label="Years"></div>
+          <div class="yearpicker-panel" id="yearPickerPanel" hidden>
+            <div class="yearpicker-list" id="yearPickerList" role="listbox" aria-label="Years"></div>
+          </div>
         </div>
-      </div>
 
-      <select id="yearFilter" class="filter-select" style="display:none;">
-        <option value="all">All</option>
-      </select>
-    </div>
-    <div class="map-story-count" id="storyCountSummary" aria-live="polite">
-      Showing 0 stories
+        <select id="yearFilter" class="filter-select" style="display:none;">
+          <option value="all">All</option>
+        </select>
+      </div>
+      <div class="map-story-count" id="storyCountSummary" aria-live="polite">
+        Showing 0 stories
+      </div>
     </div>
   </div>
 
