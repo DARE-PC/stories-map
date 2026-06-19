@@ -294,6 +294,10 @@ html, body {
     margin-bottom: 6px;
   }
 
+  .map-story-count {
+    display: none;
+  }
+
   .map-subtitle {
     display: none;
   }
