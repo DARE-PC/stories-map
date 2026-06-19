@@ -26,7 +26,7 @@
     </div>
     </div>  
   
-  <div class="map-overlay">
+  <div class="map-overlay" id="mapOverlay">
     <div class="overlay-brand">
       <a
         class="overlay-brand-link"
@@ -43,7 +43,23 @@
       </a>
     </div>
 
-    <div class="overlay-panel">
+    <button
+      type="button"
+      class="sheet-toggle"
+      id="sheetToggle"
+      aria-expanded="false"
+      aria-controls="overlayPanel"
+    >
+      <span class="sheet-toggle-grip" aria-hidden="true"></span>
+      <span class="sheet-toggle-copy">
+        <span class="sheet-toggle-kicker">Pulitzer Center</span>
+        <span class="sheet-toggle-title">Explore stories</span>
+      </span>
+      <span class="sheet-toggle-summary" id="sheetToggleSummary">Showing 0 stories</span>
+      <span class="sheet-toggle-caret" aria-hidden="true">▴</span>
+    </button>
+
+    <div class="overlay-panel" id="overlayPanel">
       <div class="map-title">Our stories (2006-2026)</div>
       <div class="map-subtitle">
         Click clusters or scroll to zoom. Click on a point to access that story.

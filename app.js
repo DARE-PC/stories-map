@@ -155,6 +155,10 @@ if (!mapFailed && map) {
     const yearPickerPanel = document.getElementById("yearPickerPanel");
     const yearPickerList = document.getElementById("yearPickerList");
     const storyCountSummary = document.getElementById("storyCountSummary");
+    const mapOverlay = document.getElementById("mapOverlay");
+    const overlayPanel = document.getElementById("overlayPanel");
+    const sheetToggle = document.getElementById("sheetToggle");
+    const sheetToggleSummary = document.getElementById("sheetToggleSummary");
 
     let allGeojson = null;
     let availableYears = [];
@@ -162,6 +166,7 @@ if (!mapFailed && map) {
     let currentYear = "all";
     const storyCountFormatter = new Intl.NumberFormat("en-US");
     const mobileViewport = window.matchMedia("(max-width: 768px)");
+    let isMobileSheetOpen = !mobileViewport.matches;
 
     function labelForValue(value) {
       return value === "all" ? "All" : value;
@@ -224,10 +229,16 @@ if (!mapFailed && map) {
     }
 
     function updateStoryCountSummary() {
-      if (!storyCountSummary) return;
-
       const matchingStories = getFilteredFeatures().length;
-      storyCountSummary.textContent = `Showing ${formatStoryCountLabel(matchingStories)}`;
+      const summaryLabel = `Showing ${formatStoryCountLabel(matchingStories)}`;
+
+      if (storyCountSummary) {
+        storyCountSummary.textContent = summaryLabel;
+      }
+
+      if (sheetToggleSummary) {
+        sheetToggleSummary.textContent = summaryLabel;
+      }
     }
 
     function getYearCount(selectedYear) {
@@ -426,6 +437,26 @@ if (!mapFailed && map) {
       closePicker(yearPickerPanel, yearPickerBtn);
     }
 
+    function syncMobileSheetState() {
+      if (!mapOverlay || !overlayPanel || !sheetToggle) return;
+
+      if (!mobileViewport.matches) {
+        mapOverlay.dataset.sheetState = "desktop";
+        overlayPanel.hidden = false;
+        sheetToggle.setAttribute("aria-expanded", "true");
+        return;
+      }
+
+      const nextState = isMobileSheetOpen ? "open" : "collapsed";
+      mapOverlay.dataset.sheetState = nextState;
+      overlayPanel.hidden = !isMobileSheetOpen;
+      sheetToggle.setAttribute("aria-expanded", String(isMobileSheetOpen));
+
+      if (!isMobileSheetOpen) {
+        closeAllPickers();
+      }
+    }
+
     function bindPickerToggle(button, panel, renderList) {
       if (!button || button.dataset.bound) return;
 
@@ -456,19 +487,50 @@ if (!mapFailed && map) {
     bindPanelStopPropagation(yearPickerPanel);
 
     if (!mobileViewport.datasetBound) {
-      mobileViewport.addEventListener("change", () => {
+      mobileViewport.addEventListener("change", (e) => {
+        isMobileSheetOpen = !e.matches;
         renderYearPickerList();
+        syncMobileSheetState();
       });
       mobileViewport.datasetBound = "true";
     }
 
+    if (sheetToggle && !sheetToggle.dataset.bound) {
+      sheetToggle.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!mobileViewport.matches) return;
+        isMobileSheetOpen = !isMobileSheetOpen;
+        syncMobileSheetState();
+      });
+      sheetToggle.dataset.bound = "true";
+    }
+
     if (!document.body.dataset.pickerDocBound) {
-      document.addEventListener("click", () => closeAllPickers());
+      document.addEventListener("click", (e) => {
+        closeAllPickers();
+
+        if (
+          mobileViewport.matches &&
+          isMobileSheetOpen &&
+          mapOverlay &&
+          !mapOverlay.contains(e.target)
+        ) {
+          isMobileSheetOpen = false;
+          syncMobileSheetState();
+        }
+      });
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeAllPickers();
+        if (e.key !== "Escape") return;
+        closeAllPickers();
+        if (mobileViewport.matches && isMobileSheetOpen) {
+          isMobileSheetOpen = false;
+          syncMobileSheetState();
+        }
       });
       document.body.dataset.pickerDocBound = "true";
     }
+
+    syncMobileSheetState();
 
 
     fetch(geojsonUrl)
@@ -499,6 +561,7 @@ if (!mapFailed && map) {
         }
 
         updateStoryCountSummary();
+        syncMobileSheetState();
       })
       .catch(() => {
         // If fetch fails, dropdown won't populate but the map still works.
