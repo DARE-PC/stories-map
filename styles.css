@@ -260,11 +260,6 @@ html, body {
     border-top: 1px solid rgba(17, 44, 78, 0.08);
   }
 
-  .yearpicker-panel {
-    top: auto;
-    bottom: calc(100% + 8px);
-  }
-
   .map-title {
     font-size: 13px;
     margin-bottom: 6px;
@@ -434,6 +429,12 @@ html, body {
 }
 
 @media (max-width: 768px) {
+  .yearpicker-panel {
+    top: auto;
+    bottom: calc(100% + 8px);
+    background: rgba(255,255,255,1);
+  }
+
   .yearpicker-panel::after {
     opacity: 1;
   }
